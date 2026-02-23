@@ -472,6 +472,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Get a shareable URL for an activity
+  function getShareUrl(activityName) {
+    const url = new URL(window.location.href);
+    url.hash = encodeURIComponent(activityName);
+    return url.toString();
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -569,6 +576,19 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-section">
+        <span class="share-label">Share:</span>
+        ${(() => {
+          const shareUrl = getShareUrl(name);
+          const shareText = `Check out "${name}" at Mergington High School!`;
+          return `
+        <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}" target="_blank" rel="noopener noreferrer" class="share-btn share-twitter" title="Share on Twitter">𝕏</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}" target="_blank" rel="noopener noreferrer" class="share-btn share-facebook" title="Share on Facebook">f</a>
+        <a href="https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}" target="_blank" rel="noopener noreferrer" class="share-btn share-whatsapp" title="Share on WhatsApp">💬</a>
+        <button class="share-btn share-copy" data-url="${shareUrl}" title="Copy link">🔗</button>
+          `;
+        })()}
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -585,6 +605,18 @@ document.addEventListener("DOMContentLoaded", () => {
           openRegistrationModal(name);
         });
       }
+    }
+
+    // Add click handler for copy link button
+    const copyButton = activityCard.querySelector(".share-copy");
+    if (copyButton) {
+      copyButton.addEventListener("click", () => {
+        navigator.clipboard.writeText(copyButton.dataset.url).then(() => {
+          showMessage("Link copied to clipboard!", "success");
+        }).catch(() => {
+          showMessage("Could not copy link. Please try again.", "error");
+        });
+      });
     }
 
     activitiesList.appendChild(activityCard);
